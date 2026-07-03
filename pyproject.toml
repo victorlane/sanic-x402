@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sanic-x402"
+version = "0.1.0"
+description = "x402 payment-gated routes for Sanic: ask for payment with a single decorator"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Victor Brinkhorst" }]
+keywords = ["sanic", "x402", "payments", "micropayments", "http-402", "stablecoin"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+]
+dependencies = [
+    "sanic>=23.12",
+    "x402[httpx]>=2.14,<3",
+]
+
+[project.optional-dependencies]
+evm = ["x402[evm]>=2.14,<3"]
+ext = ["sanic-ext>=23.12"]
+
+[project.urls]
+Homepage = "https://github.com/victorlane/sanic-x402"
+"x402 Protocol" = "https://www.x402.org/"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "sanic-testing>=23.12",
+    "ruff>=0.8",
+    "x402[evm]>=2.14,<3",
+    "sanic-ext>=23.12",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["sanic_x402"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
