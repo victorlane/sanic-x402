@@ -18,5 +18,3 @@ jobs:
           token: ${{ secrets.PAT }}
           release-type: python
           target-branch: main
-          # Labeling needs Issues write, which the fine-grained PAT does not have
-          skip-labeling: true
