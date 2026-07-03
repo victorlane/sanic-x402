@@ -13,6 +13,9 @@ def paid(
     pay_to: Any = None,
     network: str | None = None,
     scheme: str | None = None,
+    asset: str | None = None,
+    asset_decimals: int = 6,
+    asset_extra: dict[str, Any] | None = None,
     accepts: list[PaymentOption] | PaymentOption | None = None,
     description: str | None = None,
     mime_type: str | None = None,
@@ -35,11 +38,22 @@ def paid(
 
     Args:
         price: Money string (``"$0.01"``), number, or an x402 ``AssetAmount``.
-            May also be a callable ``(HTTPRequestContext) -> Price`` for
-            dynamic pricing. Required unless ``accepts`` is given.
+            Money values are USD-denominated and resolve to the network's
+            default USD stablecoin unless ``asset`` is given. May also be a
+            callable ``(HTTPRequestContext) -> Price`` for dynamic pricing.
+            Required unless ``accepts`` is given.
         pay_to: Receiving address; defaults to the app-level ``pay_to``.
         network: CAIP-2 network id (e.g. ``"eip155:8453"`` for Base).
         scheme: Payment scheme, default ``"exact"``.
+        asset: Token identifier to charge in (ERC-20 contract address, SPL
+            mint, or ISO 4217 code). When set, ``price`` is interpreted as a
+            decimal amount of this asset (currency symbols and codes such as
+            ``"€0.50"`` or ``"0.50 EURC"`` are accepted and stripped) and is
+            converted to atomic units via ``asset_decimals``.
+        asset_decimals: Decimals used to convert ``price`` for a custom
+            ``asset`` (default 6, e.g. USDC/EURC).
+        asset_extra: Scheme-specific asset metadata, e.g. the token's EIP-712
+            domain ``{"name": "EURC", "version": "2"}`` for exact-EVM.
         accepts: Full list of :class:`x402.http.PaymentOption` for advanced
             multi-network/multi-asset configuration; overrides ``price`` et al.
         description: Human-readable description shown to payers. Defaults to
@@ -62,6 +76,9 @@ def paid(
         "pay_to": pay_to,
         "network": network,
         "scheme": scheme,
+        "asset": asset,
+        "asset_decimals": asset_decimals,
+        "asset_extra": asset_extra,
         "accepts": accepts,
         "description": description,
         "mime_type": mime_type,

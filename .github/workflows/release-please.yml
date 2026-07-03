@@ -17,5 +17,4 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           release-type: python
-          package-name: sanic-x402
           target-branch: main

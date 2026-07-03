@@ -112,6 +112,34 @@ X402(app, routes={
 })
 ```
 
+## Supported Currencies
+
+x402 is asset-agnostic: a payment option names any token on any supported network, and sanic-x402 exposes all of it.
+
+**USD money strings** like `"$0.01"` are the simple path. They resolve to the network's default USD stablecoin from the SDK registry, which covers USDC on Base, Base Sepolia, Polygon, Arbitrum One, Arbitrum Sepolia, Monad, XDC and others, plus USDT0 (Stable), MegaUSD (MegaETH), Mezo USD, and more.
+
+**Any other token** (EURC, DAI, or your own ERC-20/SPL asset) works via `asset=`:
+
+```python
+@paid(
+    "€0.50",
+    asset="0x808456652fdb597867f38412077A9182bf77359F",  # EURC on Base
+    asset_decimals=6,
+    asset_extra={"name": "EURC", "version": "2"},  # token's EIP-712 domain
+)
+async def handler(request): ...
+```
+
+The price is converted to atomic units with `asset_decimals`, and currency symbols or codes in the string are stripped. For full control, pass an `AssetAmount` directly as the price:
+
+```python
+from sanic_x402 import AssetAmount
+
+@paid(AssetAmount(amount="500000", asset="0x8084...", extra={"name": "EURC", "version": "2"}))
+```
+
+Two practical constraints apply. On EVM networks with the `exact` scheme, the token must support EIP-3009 `transferWithAuthorization` (USDC and EURC do) or the Permit2 flow. And your facilitator must support the scheme and network pair; check `GET <facilitator>/supported`. The v2 spec also allows ISO 4217 codes (like `"USD"`) as the asset for fiat facilitators.
+
 ## Advanced Usage
 
 <details>

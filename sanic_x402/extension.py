@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 from sanic import Sanic
@@ -24,7 +26,7 @@ from x402.http.types import HTTPTransportContext
 from x402.http.constants import SETTLEMENT_OVERRIDES_HEADER
 from x402.http.facilitator_client_base import FacilitatorResponseError
 from x402.http.x402_http_server import PaywallProvider, x402HTTPResourceServer
-from x402.schemas import VerifiedPaymentCancelOptions
+from x402.schemas import AssetAmount, VerifiedPaymentCancelOptions
 
 from .adapter import SanicHTTPAdapter
 from .decorator import find_marker
@@ -50,6 +52,25 @@ class _GateState:
     gate: x402HTTPResourceServer
     result: Any
     context: HTTPRequestContext
+
+
+def _to_asset_amount(
+    price: Any, asset: str, decimals: int, extra: dict[str, Any] | None
+) -> AssetAmount:
+    """Convert a decimal price in a custom asset to atomic units.
+
+    Accepts numbers and strings with optional currency decoration, e.g.
+    ``"€0.50"``, ``"0.50 EURC"``, ``0.5``, ``Decimal("0.5")``.
+    """
+    if isinstance(price, AssetAmount):
+        return price
+    if isinstance(price, str):
+        cleaned = price.strip().lstrip("$€£¥")
+        cleaned = re.sub(r"\s*[A-Za-z][A-Za-z0-9.]*\s*$", "", cleaned).strip()
+    else:
+        cleaned = str(price)
+    atomic = int(Decimal(cleaned) * (Decimal(10) ** decimals))
+    return AssetAmount(amount=str(atomic), asset=asset, extra=extra or {})
 
 
 def _facilitator_error(error: FacilitatorResponseError) -> HTTPResponse:
@@ -203,11 +224,26 @@ class X402:
                     f"Route '{route.name}' is marked @paid but has no pay_to "
                     "address: pass pay_to= to @paid() or set a default on X402()."
                 )
+            price = marker["price"]
+            asset = marker.get("asset")
+            if asset is not None:
+                if callable(price):
+                    raise ValueError(
+                        f"Route '{route.name}': asset= cannot be combined with "
+                        "a dynamic price callable; return an AssetAmount from "
+                        "the callable instead."
+                    )
+                price = _to_asset_amount(
+                    price,
+                    asset,
+                    marker.get("asset_decimals") or 6,
+                    marker.get("asset_extra"),
+                )
             accepts = [
                 PaymentOption(
                     scheme=marker.get("scheme") or self.scheme,
                     pay_to=pay_to,
-                    price=marker["price"],
+                    price=price,
                     network=marker.get("network") or self.network,
                     max_timeout_seconds=marker.get("max_timeout_seconds")
                     or self.default_max_timeout_seconds,

@@ -23,6 +23,7 @@ from x402.http import (
     PaywallConfig,
     RouteConfig,
 )
+from x402.schemas import AssetAmount
 
 from .adapter import SanicHTTPAdapter
 from .decorator import paid
@@ -40,6 +41,7 @@ __all__ = [
     "DEFAULT_NETWORK",
     "DEFAULT_SCHEME",
     # Re-exports from the x402 SDK for convenience
+    "AssetAmount",
     "PaymentOption",
     "RouteConfig",
     "PaywallConfig",
