@@ -28,22 +28,21 @@ from x402.schemas import AssetAmount
 from .adapter import SanicHTTPAdapter
 from .decorator import paid
 from .exceptions import PaymentRequired
-from .extension import DEFAULT_NETWORK, DEFAULT_SCHEME, PaymentInfo, X402
+from .extension import DEFAULT_NETWORK, DEFAULT_SCHEME, X402, PaymentInfo
 
 __version__ = "0.1.0"
 
 __all__ = [
-    "X402",
-    "paid",
-    "PaymentInfo",
-    "PaymentRequired",
-    "SanicHTTPAdapter",
     "DEFAULT_NETWORK",
     "DEFAULT_SCHEME",
-    # Re-exports from the x402 SDK for convenience
+    "X402",
     "AssetAmount",
-    "PaymentOption",
-    "RouteConfig",
-    "PaywallConfig",
     "HTTPFacilitatorClient",
+    "PaymentInfo",
+    "PaymentOption",
+    "PaymentRequired",
+    "PaywallConfig",
+    "RouteConfig",
+    "SanicHTTPAdapter",
+    "paid",
 ]
