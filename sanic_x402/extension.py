@@ -22,9 +22,9 @@ from x402.http import (
     RouteConfigurationError,
     RoutesConfig,
 )
-from x402.http.types import HTTPTransportContext
 from x402.http.constants import SETTLEMENT_OVERRIDES_HEADER
 from x402.http.facilitator_client_base import FacilitatorResponseError
+from x402.http.types import HTTPTransportContext
 from x402.http.x402_http_server import PaywallProvider, x402HTTPResourceServer
 from x402.schemas import AssetAmount, VerifiedPaymentCancelOptions
 
@@ -421,7 +421,7 @@ class X402:
             )
         except FacilitatorResponseError as error:
             return _facilitator_error(error)
-        except Exception:
+        except Exception:  # noqa: BLE001 - never let settlement errors leak a paid response
             logger.exception("sanic-x402: settlement failed for %s", request.path)
             return json_response({}, status=402)
 

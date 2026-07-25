@@ -67,5 +67,5 @@ def test_asset_with_dynamic_price_rejected(facilitator):
     async def bad(request):
         return json({"ok": True})
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="asset= cannot be combined"):
         app.test_client.get("/bad")

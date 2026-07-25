@@ -42,5 +42,5 @@ class SanicHTTPAdapter:
     def get_body(self) -> Any:
         try:
             return self._request.json
-        except Exception:
+        except Exception:  # noqa: BLE001 - any body parse failure means "no body"
             return None
